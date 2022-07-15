@@ -33,7 +33,6 @@ print(df3)
 
 
 # TODO: display ask, bid, PE Ratios, EPS, analyst recommendations
-# comment: i'm not sure if we need to print data over a certain period
 # the print statements below only print the current data
 print("two PE ratios are trailingPE and forwardPE: ", dow.info["trailingPE"], dow.info["forwardPE"])
 print("ask: ", dow.info["ask"])
