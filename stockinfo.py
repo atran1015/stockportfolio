@@ -14,8 +14,6 @@ dow.info
 # get historical market data
 hist = dow.history(period="1mo")
 
-
-
 # print("show analyst recommendations:")
 # print(dow.recommendations)
 analyst_recdf = pd.DataFrame(dow.recommendations)
