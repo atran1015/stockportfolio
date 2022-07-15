@@ -15,12 +15,21 @@ dow.info
 hist = dow.history(period="1mo")
 
 
+
+# print("show analyst recommendations:")
+# print(dow.recommendations)
+analyst_recdf = pd.DataFrame(dow.recommendations)
+
 df = pd.DataFrame(hist)
 # print(type(df)) - for debug
 column_headers = list(df.columns.values)
 # print("The Column Header :", column_headers) - for debug
 df2 = df[["Open","Volume","Close","Low"]]
-print(df2)
+# print(df2)
+
+# appending analyst recommendations columns to selected historical columns
+df3 = pd.concat([df2, analyst_recdf])
+print(df3)
 
 
 # TODO: display ask, bid, PE Ratios, EPS, analyst recommendations
@@ -32,8 +41,6 @@ print("bid: ", dow.info["bid"])
 print("earnings/revenue per share (EPS?): ", dow.info["revenuePerShare"])
 
 
-print("show analyst recommendations:")
-print(dow.recommendations)
 # if dow:
 #     print("not empty")
 
