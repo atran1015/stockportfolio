@@ -11,7 +11,7 @@ dow = yf.Ticker("DOW")
 dow.info
 
 # get historical market data
-# no need to display dividends, stock splits, and high
+# TODO: no need to display dividends, stock splits, and high
 
 hist = dow.history(period="1mo")
 print(hist)
