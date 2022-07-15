@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import yfinance as yf
+import pandas as pd
+# yf.download returns a DataFrame
 # print("This is a downloading the data:")
 # data = yf.download("DOW", start="2022-06-15", end="2022-07-14")
 # print(data)
-
 
 print("\nThis is saving data to a variable:")
 dow = yf.Ticker("DOW")
@@ -11,26 +12,28 @@ dow = yf.Ticker("DOW")
 dow.info
 
 # get historical market data
-# TODO: no need to display dividends, stock splits, and high
-
 hist = dow.history(period="1mo")
-print(hist)
+
+
+df = pd.DataFrame(hist)
+# print(type(df)) - for debug
+column_headers = list(df.columns.values)
+# print("The Column Header :", column_headers) - for debug
+df2 = df[["Open","Volume","Close","Low"]]
+print(df2)
 
 
 # TODO: display ask, bid, PE Ratios, EPS, analyst recommendations
-# comment: i'm not sure if he wants us to print data over a certain period
+# comment: i'm not sure if we need to print data over a certain period
 # the print statements below only print the current data
-print("two PE ratios are trailingPE and forwardPE:")
-print(dow.info["trailingPE"])
-print(dow.info["forwardPE"])
-print("ask:")
-print(dow.info["ask"])
-print("bid:")
-print(dow.info["bid"])
-print("earnings/revenue per share (EPS?):")
-print(dow.info["revenuePerShare"])
-print("analyst recommendations? 'numberOfAnalystOpinions'")
-print(dow.info["numberOfAnalystOpinions"])
+print("two PE ratios are trailingPE and forwardPE: ", dow.info["trailingPE"], dow.info["forwardPE"])
+print("ask: ", dow.info["ask"])
+print("bid: ", dow.info["bid"])
+print("earnings/revenue per share (EPS?): ", dow.info["revenuePerShare"])
+
+
+print("show analyst recommendations:")
+print(dow.recommendations)
 # if dow:
 #     print("not empty")
 
