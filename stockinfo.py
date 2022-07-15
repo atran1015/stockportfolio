@@ -1,22 +1,36 @@
 #!/usr/bin/env python3
 import yfinance as yf
-print("This is a downloaded file:")
-data = yf.download("DOW", start="2022-06-15", end="2022-07-14")
-print(data)
+# print("This is a downloading the data:")
+# data = yf.download("DOW", start="2022-06-15", end="2022-07-14")
+# print(data)
 
 
 print("\nThis is saving data to a variable:")
 dow = yf.Ticker("DOW")
 # get stock info
-# print(dow.info)
+dow.info
 
-# get historical market data, no need to display dividends and stock splits
-# open, close, ask, bid, volume, PE Ratios, EPS, analyst recommendations
+# get historical market data
+# no need to display dividends, stock splits, and high
+
 hist = dow.history(period="1mo")
 print(hist)
-print(dow.open)
 
 
+# TODO: display ask, bid, PE Ratios, EPS, analyst recommendations
+# comment: i'm not sure if he wants us to print data over a certain period
+# the print statements below only print the current data
+print("two PE ratios are trailingPE and forwardPE:")
+print(dow.info["trailingPE"])
+print(dow.info["forwardPE"])
+print("ask:")
+print(dow.info["ask"])
+print("bid:")
+print(dow.info["bid"])
+print("earnings/revenue per share (EPS?):")
+print(dow.info["revenuePerShare"])
+print("analyst recommendations? 'numberOfAnalystOpinions'")
+print(dow.info["numberOfAnalystOpinions"])
 # if dow:
 #     print("not empty")
 
