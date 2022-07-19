@@ -7,31 +7,46 @@ import pandas as pd
 # print(data)
 
 def PrintHistoricalAndRec(ticker):
-        hist = ticker.history(period="1mo")
+        hist = ticker.history(period="1d")
         analyst_recdf = pd.DataFrame(ticker.recommendations)
         df = pd.DataFrame(hist)
         df2 = df[["Open","Volume","Close","Low"]]
         df3 = pd.concat([df2, analyst_recdf])
         print(df3)
+        df3.to_csv("concat_data.csv")
+        return df3
 
 def PrintPERatios(ticker):
-        print("two PE ratios are trailingPE and forwardPE: ", ticker.info["trailingPE"], ticker.info["forwardPE"])
+        print("two PE ratios are trailingPE and forwardPE: ", ticker["trailingPE"], ticker["forwardPE"])
+        return ticker["trailingPE"], ticker["forwardPE"]
 
 def PrintAsk(ticker):
-        print("ask: ", ticker.info["ask"])
+        print("Ask: ", ticker["ask"])
+        return ticker["ask"]
 
 def PrintBid(ticker):
-        print("bid: ", ticker.info["bid"])
+        print("Bid: ", ticker["bid"])
+        return ticker["bid"]
 
 def PrintEPS(ticker):
-        print("EPS: ", ticker.info["revenuePerShare"])
-
-inp = input('Input a stock ticker: ')
-stock = yf.Ticker(inp)
+        print("EPS: ", ticker["revenuePerShare"])
+        return ticker["revenuePerShare"]
 
 
-PrintHistoricalAndRec(stock)
-PrintPERatios(stock)
-PrintAsk(stock)
-PrintBid(stock)
-PrintEPS(stock)
+
+if __name__ == '__main__':
+        inp = input('Input a stock ticker: ')
+        stock = yf.Ticker(inp)
+        hist = stock.history(period="1d")
+        df = pd.DataFrame(hist)
+        df2 = df[["Open","Volume","Close","Low"]]
+        df2.to_csv("history.csv")
+        rec = stock.recommendations
+        rec.to_csv("recommendations.csv")
+
+
+        PrintHistoricalAndRec(stock)
+        PrintPERatios(stock.info)
+        PrintAsk(stock.info)
+        PrintBid(stock.info)
+        PrintEPS(stock.info)
