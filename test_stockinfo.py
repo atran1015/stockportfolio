@@ -25,7 +25,7 @@ class TestSelectStock(unittest.TestCase):
         val = PrintHistoricalAndRec(stock)
         expected = pd.read_csv("concat_data.csv", index_col=[0])
         pd_testing.assert_frame_equal(val, expected)
-        print("Test passed")
+        print("Passed")
     
 
     def testPrintPERatios(self):
@@ -34,27 +34,27 @@ class TestSelectStock(unittest.TestCase):
         expected_b = 6.838753
         self.assertEqual(a, expected_a)
         self.assertEqual(b, expected_b)
-        print("Test passed")
+        print("Passed")
     
     
     def testPrintAsk(self):
         val = PrintAsk(stock)
         expected = 0
         self.assertEqual(val , expected)
-        print("Test passed")
+        print("Passed")
 
     
     def testPrintBid(self):
         val = PrintBid(stock)
         expected = 0
         self.assertEqual(val , expected)
-        print("Test passed")
+        print("Passed")
 
     def testPrintEPS(self):
         val = PrintEPS(stock)
         expected = 78.74
         self.assertEqual(val, expected)
-        print("Test passed")
+        print("Passed")
         
  
 if __name__ == '__main__':
