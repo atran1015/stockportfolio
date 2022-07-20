@@ -1,58 +1,61 @@
+from cmath import exp
 import unittest
 #from unittest.mock import patch
-import io
-import sys
 import yfinance as yf
 from stockinfo import *
+import json
+import pandas as pd
+import numpy as np
+import pandas.testing as pd_testing
 
-# test function only, check to see if it returns accurate results or not 
+with open("stockinfomock.json") as fh:
+            stock = json.load(fh)
 
-class SelectStock(unittest.TestCase):
+class MockStock():
+    def __init__(self):
+        self.recommendations = pd.read_csv("recommendations.csv", index_col=[0])
+    def history(self, **args):
+        df = pd.read_csv("history.csv", index_col=[0])
+        return df
 
-    @staticmethod
-    def testPrintHistoricalAndRec():
-        capturedOutput = io.StringIO()                  # Create StringIO object
-        sys.stdout = capturedOutput                     #  and redirect stdout.
-        stock = yf.Ticker("DOW")
-        PrintHistoricalAndRec(stock)
-        sys.stdout = sys.__stdout__                     # Reset redirect.
-        print ('Captured', capturedOutput.getvalue())   # Now works as before.
-
-    @staticmethod
-    def testPrintPERatios():
-        capturedOutput = io.StringIO()                  # Create StringIO object
-        sys.stdout = capturedOutput                     #  and redirect stdout.
-        stock = yf.Ticker("DOW")
-        PrintPERatios(stock)
-        sys.stdout = sys.__stdout__                     # Reset redirect.
-        print ('Captured', capturedOutput.getvalue())   # Now works as before.
+class TestSelectStock(unittest.TestCase):
     
-    @staticmethod
-    def testPrintAsk():
-        capturedOutput = io.StringIO()                  # Create StringIO object
-        sys.stdout = capturedOutput                     #  and redirect stdout.
-        stock = yf.Ticker("DOW")
-        PrintAsk(stock)
-        sys.stdout = sys.__stdout__                     # Reset redirect.
-        print ('Captured', capturedOutput.getvalue())   # Now works as before.
+    def testPrintHistoricalAndRec(self):
+        stock = MockStock()
+        val = PrintHistoricalAndRec(stock)
+        expected = pd.read_csv("concat_data.csv", index_col=[0])
+        pd_testing.assert_frame_equal(val, expected)
+        print("Passed")
+    
 
-    @staticmethod
-    def testPrintBid():
-        capturedOutput = io.StringIO()                  # Create StringIO object
-        sys.stdout = capturedOutput                     #  and redirect stdout.
-        stock = yf.Ticker("DOW")
-        PrintBid(stock)
-        sys.stdout = sys.__stdout__                     # Reset redirect.
-        print ('Captured', capturedOutput.getvalue())   # Now works as before.
+    def testPrintPERatios(self):
+        a, b = PrintPERatios(stock)
+        expected_a = 5.503817
+        expected_b = 6.838753
+        self.assertEqual(a, expected_a)
+        self.assertEqual(b, expected_b)
+        print("Passed")
+    
+    
+    def testPrintAsk(self):
+        val = PrintAsk(stock)
+        expected = 0
+        self.assertEqual(val , expected)
+        print("Passed")
 
-    @staticmethod
-    def testPrintEPS():
-        capturedOutput = io.StringIO()                  # Create StringIO object
-        sys.stdout = capturedOutput                     #  and redirect stdout.
-        stock = yf.Ticker("DOW")
-        PrintEPS(stock)
-        sys.stdout = sys.__stdout__                     # Reset redirect.
-        print ('Captured', capturedOutput.getvalue())   # Now works as before.
+    
+    def testPrintBid(self):
+        val = PrintBid(stock)
+        expected = 0
+        self.assertEqual(val , expected)
+        print("Passed")
+
+    def testPrintEPS(self):
+        val = PrintEPS(stock)
+        expected = 78.74
+        self.assertEqual(val, expected)
+        print("Passed")
+        
  
 if __name__ == '__main__':
     unittest.main()
