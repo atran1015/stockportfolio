@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import yfinance as yf
 import pandas as pd
+import requests
+import json
 # yf.download returns a DataFrame
 # print("This is a downloading the data:")
 # data = yf.download("DOW", start="2022-06-15", end="2022-07-14")
@@ -44,6 +46,7 @@ if __name__ == '__main__':
         rec = stock.recommendations
         rec.to_csv("recommendations.csv")
 
+        # TODO: pull quote data from Yahoo Finance API
 
         PrintHistoricalAndRec(stock)
         PrintPERatios(stock.info)
