@@ -46,29 +46,30 @@ class HomePage(MDScreen):
 
     availablelist=ObjectProperty(None) 
 
+    def fetchData(self, userInputStockData):
+        print(userInputStockData)
+
+    def addToWatchList(self):
+        print("Added to watchlist")
+
     #perform actions when entered
     def on_enter(self, *args):
         layout = GridLayout(rows=1,cols=2)
         self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
 
-        # leftLayout = GridLayout(rows=2)
-        leftHeaderLayout = GridLayout(rows=6,cols=2)
-        leftHeaderLayout.add_widget(MDTextField(hint_text= "Please Input A Stock",pos_hint= {"top": 1}))
-        leftHeaderLayout.add_widget(MDIconButton(icon= "magnify"))
-        # leftHeaderLayout.add_widget(MDLabel(text="WatchList"))
-        # leftLayout.add_widget(leftHeaderLayout) 
-        # leftBodyLayout
-        leftHeaderLayout.add_widget(TwoLineListItem(text="Open",secondary_text="51.2"))  
-        leftHeaderLayout.add_widget(TwoLineListItem(text="Close",secondary_text="46.2")) 
-        leftHeaderLayout.add_widget(TwoLineListItem(text="Bid",secondary_text="No")) 
-        leftHeaderLayout.add_widget(TwoLineListItem(text="Ask",secondary_text="No")) 
-        leftHeaderLayout.add_widget(TwoLineListItem(text="Volume",secondary_text="100")) 
-        leftHeaderLayout.add_widget(TwoLineListItem(text="PE Ratio",secondary_text="51.2")) 
-        leftHeaderLayout.add_widget(TwoLineListItem(text="EPS",secondary_text="51.2")) 
-        leftHeaderLayout.add_widget(TwoLineListItem(text="Analyst Recommendation",secondary_text="51.2")) 
-        leftHeaderLayout.add_widget(TwoLineListItem(text="Add to Watchlist")) 
+        leftLayout = GridLayout(rows=6,cols=2)
 
-        layout.add_widget(leftHeaderLayout)   
+       
+        leftLayout.add_widget(TwoLineListItem(text="Open",secondary_text="51.2"))  
+        leftLayout.add_widget(TwoLineListItem(text="Close",secondary_text="46.2")) 
+        leftLayout.add_widget(TwoLineListItem(text="Bid",secondary_text="No")) 
+        leftLayout.add_widget(TwoLineListItem(text="Ask",secondary_text="No")) 
+        leftLayout.add_widget(TwoLineListItem(text="Volume",secondary_text="100")) 
+        leftLayout.add_widget(TwoLineListItem(text="PE Ratio",secondary_text="51.2")) 
+        leftLayout.add_widget(TwoLineListItem(text="EPS",secondary_text="51.2")) 
+        leftLayout.add_widget(TwoLineListItem(text="Analyst Recommendation",secondary_text="51.2")) 
+        
+        layout.add_widget(leftLayout)   
 
         rightLayout = GridLayout(rows=1)
         # rightLayout.add_widget(

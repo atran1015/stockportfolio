@@ -65,6 +65,24 @@ PageManager:
     name:"homepage"
     availablelist: availablelist
     
+    MDTextField:
+        id: stock
+        hint_text: "Please Input A Stock"
+        # icon_right: "account"
+        size_hint_x: None
+        width: 200
+        font_size: 18
+        pos_hint: {"center_x": 0.1, "center_y": 0.9}
+
+    MDIconButton:
+        pos_hint: {"center_x": 0.4, "center_y": 0.9}
+        icon: 'magnify'
+        on_press: root.fetchData(root.ids.stock.text)
+    
+    MDLabel:
+        text: "WatchList"
+        pos_hint: {"center_x": 1, "center_y": 0.9}
+
      #grid with all the tables to display
     MDGridLayout:
         id:availablelist
@@ -73,5 +91,10 @@ PageManager:
         size_hint_y:None
         height:490
         top: 600
-        padding:'20dp' 
- 
+        padding:'10dp' 
+    
+    MDRoundFlatButton:
+        text: "Add to WatchList"
+        font_size: 12
+        pos_hint: {"center_x": 0.2,"center_y": 0.2}
+        on_press: root.addToWatchList()
