@@ -58,15 +58,16 @@ PageManager:
         size_hint_x: 0.2
         allow_stretch: True
         pos_hint: {"center_x": 0.1, "center_y": 0.9}
+
         
 <HomePage>:
 
     name:"homepage"
-    availablecourseslist: availablecourseslist
+    availablelist: availablelist
     
      #grid with all the tables to display
     MDGridLayout:
-        id:availablecourseslist
+        id:availablelist
         cols:2
         #size_hint_x:None
         size_hint_y:None

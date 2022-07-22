@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from operator import pos
+from turtle import position
 import yfinance as yf
 import pandas as pd
 import requests
@@ -15,6 +17,7 @@ from kivy.lang.builder import Builder
 from kivymd.uix.card import MDCard
 from kivy.properties import ObjectProperty
 from kivymd.uix.label import MDLabel
+from kivymd.uix.textfield import MDTextField
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.expansionpanel import MDExpansionPanel,MDExpansionPanelTwoLine
 from kivymd.uix.list import TwoLineListItem,OneLineListItem
@@ -33,38 +36,61 @@ from kivymd.uix.toolbar import MDToolbar
 class LoginPage(MDScreen):
     pass
 
+Dummy = """
+        OneLineListItem:
+            id: item1
+            text: "Awesome"
+"""
+
 class HomePage(MDScreen):
-        # pass
-    availablecourseslist=ObjectProperty(None) 
+
+    availablelist=ObjectProperty(None) 
+
     #perform actions when entered
     def on_enter(self, *args):
         layout = GridLayout(rows=1,cols=2)
-        self.manager.get_screen('homepage').availablecourseslist.clear_widgets() #clear widgets
-                
-        layout.add_widget(MDDataTable(use_pagination=True,check=True,column_data=[("No.", dp(30)),("Status", dp(30)),],
-                row_data=[("1",("alert", [255 / 256, 165 / 256, 0, 1], "No Signal")),("2",("alert-circle", [1, 0, 0, 1], "Offline")),("3",("checkbox-marked-circle",[39 / 256, 174 / 256, 96 / 256, 1],"Online",))],sorted_on="Schedule",sorted_order="ASC",elevation=2,))                                                                                                
-        layout.add_widget(MDDataTable(
-                use_pagination=True,
-                check=True,
+        self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
+
+        # leftLayout = GridLayout(rows=2)
+        leftHeaderLayout = GridLayout(rows=6,cols=2)
+        leftHeaderLayout.add_widget(MDTextField(hint_text= "Please Input A Stock",pos_hint= {"top": 1}))
+        leftHeaderLayout.add_widget(MDIconButton(icon= "magnify"))
+        # leftHeaderLayout.add_widget(MDLabel(text="WatchList"))
+        # leftLayout.add_widget(leftHeaderLayout) 
+        # leftBodyLayout
+        leftHeaderLayout.add_widget(TwoLineListItem(text="Open",secondary_text="51.2"))  
+        leftHeaderLayout.add_widget(TwoLineListItem(text="Close",secondary_text="46.2")) 
+        leftHeaderLayout.add_widget(TwoLineListItem(text="Bid",secondary_text="No")) 
+        leftHeaderLayout.add_widget(TwoLineListItem(text="Ask",secondary_text="No")) 
+        leftHeaderLayout.add_widget(TwoLineListItem(text="Volume",secondary_text="100")) 
+        leftHeaderLayout.add_widget(TwoLineListItem(text="PE Ratio",secondary_text="51.2")) 
+        leftHeaderLayout.add_widget(TwoLineListItem(text="EPS",secondary_text="51.2")) 
+        leftHeaderLayout.add_widget(TwoLineListItem(text="Analyst Recommendation",secondary_text="51.2")) 
+        leftHeaderLayout.add_widget(TwoLineListItem(text="Add to Watchlist")) 
+
+        layout.add_widget(leftHeaderLayout)   
+
+        rightLayout = GridLayout(rows=1)
+        # rightLayout.add_widget(
+        rightLayout.add_widget(MDDataTable(
                 column_data=[
-                        ("Yes.", dp(30)),
-                        ("Great", dp(30))
+                        ("Stock Name",dp(30)),
+                        ("Open",dp(30)),
+                        ("Close",dp(30))
                 ],
                 row_data=[
-                        (
-                        "1",
-                        ("alert", [255 / 256, 165 / 256, 0, 1], "No Signal")
-                        ),
-                        (
-                        "2",
-                        ("alert-circle", [1, 0, 0, 1], "Offline")
-                        )
-                ],
-                sorted_on="Schedule",
-                sorted_order="ASC",
-                elevation=2,
-                ))     
-        self.manager.get_screen('homepage').availablecourseslist.add_widget(layout)
+                        ("GOOG",51.2,32.6)
+                ]
+        ))
+
+        layout.add_widget(rightLayout)
+
+        # layout.add_widget(MDDataTable(
+        #         use_pagination=True,
+        #         check=True,
+        #         elevation=2,
+        #         ))     
+        self.manager.get_screen('homepage').availablelist.add_widget(layout)
 #####################################################################################################               
  
 def PrintHistoricalAndRec(ticker):
