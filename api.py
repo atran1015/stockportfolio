@@ -47,11 +47,11 @@ def smaStrategy(stock):
     }
     response = requests.get('https://yfapi.net/v8/finance/spark?interval=1d&range=6mo&symbols=' + stock, headers=header).json()
     days = 100
-    currClosingPrice = response[stock]['close'][0]
+    currClosingPrice = response[stock]['close'][-1]
     
     if len(response[stock]['close']) >= 100:
         closingDays = response[stock]['close'] 
-        closeLast100Days = closingDays[0:100]
+        closeLast100Days = closingDays[len(response[stock]['close'])-101:len(response[stock]['close'])-1]
         movingAverage = sum(closeLast100Days) / days
     else:
         error = 'Insufficient data to calculate moving average...'
@@ -59,13 +59,13 @@ def smaStrategy(stock):
         return error
 
     if currClosingPrice > movingAverage:
-        aboveMA = stock + ' current price is above the 100-day moving average -- Time to buy shares!'
+        aboveMA = stock + ' current price is above the 100-day moving average -- Time to buy shares! (Stock Price = ' + str(currClosingPrice) +  ' | MA = ' + str(movingAverage) + ')'
         return aboveMA
     elif currClosingPrice < movingAverage:
-        belowMA = stock + 'current price is below the 100-day moving average -- Time to sell shares!'
+        belowMA = stock + ' current price is below the 100-day moving average -- Time to sell shares! (Stock Price = ' + str(currClosingPrice) +  ' | MA = ' + str(movingAverage) + ')'
         return belowMA
     else:
-        equalMA = stock + 'current price is equal to the 100-day moving average -- Lets wait!'
+        equalMA = stock + 'current price is equal to the 100-day moving average -- Lets wait!' + str(currClosingPrice) +  ' | MA = ' + str(movingAverage) + ')'
         return equalMA
 
 if __name__ == "__main__":
