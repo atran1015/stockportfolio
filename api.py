@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from distutils.log import error
 from xmlrpc.client import ResponseError
 from django import urls
