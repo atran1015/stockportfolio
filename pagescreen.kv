@@ -48,18 +48,25 @@ PageManager:
     MDRoundFlatButton:
         text: "LOG IN"
         font_size: 12
-        pos_hint: {"center_x": 0.5,"center_y": 0.4}
+        pos_hint: {"center_x": 0.5,"center_y": 0.5}
         on_press: 
-            app.root.current = "homepage"
+            root.validate()
+            #app.root.current = "homepage"
             root.manager.transition.direction ="left"
+            
               
     Image:
         source:'images/Logo.png'
-        size_hint_x: 0.2
+        size_hint_x: None
         allow_stretch: True
-        pos_hint: {"center_x": 0.1, "center_y": 0.9}
+        pos_hint: {"center_x": 0.5, "center_y": 0.81}
 
-        
+<P>:
+    Label:
+        text : "Username does not exist."
+        size_hint : 0.2, 0.1
+        pos_hint : {"x" : 0.3, "top" : 0.8}
+
 <HomePage>:
 
     name:"homepage"

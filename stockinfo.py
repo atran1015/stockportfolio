@@ -3,12 +3,7 @@ from operator import pos
 from turtle import position
 import yfinance as yf
 import pandas as pd
-import requests
-import json
-# yf.download returns a DataFrame
-# print("This is a downloading the data:")
-# data = yf.download("DOW", start="2022-06-15", end="2022-07-14")
-# print(data)
+import sqlite3
 
 from typing import Text
 from kivymd.app import MDApp
@@ -31,10 +26,48 @@ from kivy.uix.label import Label
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton,MDIconButton
 from kivymd.uix.toolbar import MDToolbar
+from kivy.uix.popup import Popup
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.widget import Widget
+
+# pop up function
+class PopupWindow(Widget):
+    def btn(self):
+        popUp()
+
+# pop up window GUI
+class P(FloatLayout):
+    pass
+
+# content of pop up
+def popUp():
+    show = P()
+    window = Popup(title = "Error", content = show,
+                   size_hint = (None, None), size = (300, 300))
+    window.open()
 
 
 class LoginPage(MDScreen):
-    pass
+        def show_alert_dialog(self):
+                if not self.dialog:
+                        self.dialog = MDDialog()
+                self.dialog.open()
+        def validate(self):
+                connection = sqlite3.connect("login.db")
+                cursor = connection.cursor()
+                username_input = self.manager.get_screen('loginpage').ids.user.text
+                
+                # check if username exists in table
+                if cursor.execute("SELECT * FROM login WHERE username = ?", (username_input,)).fetchall():
+                        # print("True")
+                        self.parent.current = 'homepage'
+                else:
+                        # print("False")
+                        popUp()
+                        
+                        
+
+                        
 
 Dummy = """
         OneLineListItem:
@@ -138,7 +171,6 @@ class stockPortfolio(MDApp):
         self.theme_cls.theme_style = "Light"
         self.theme_cls.primary_palette= "Blue"
         self.theme_cls.accent_palette= "Orange"
-        
        
         return self.root
     
@@ -147,6 +179,7 @@ class stockPortfolio(MDApp):
 #run the application
 ##using command line call
 if __name__ == '__main__':
+        
         stockPortfolio().run()
         inp = input('Input a stock ticker: ')
         stock = yf.Ticker(inp)
@@ -157,7 +190,7 @@ if __name__ == '__main__':
         rec = stock.recommendations
         rec.to_csv("recommendations.csv")
 
-        # TODO: pull quote data from Yahoo Finance API
+        
 
         PrintHistoricalAndRec(stock)
         PrintPERatios(stock.info)
