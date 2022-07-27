@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 from operator import pos
 from turtle import position
+
+from aiohttp import request
+from django.http import response
 import yfinance as yf
 import pandas as pd
 import sqlite3
+import requests
 
 from typing import Text
 from kivymd.app import MDApp
@@ -29,6 +33,8 @@ from kivymd.uix.toolbar import MDToolbar
 from kivy.uix.popup import Popup
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.widget import Widget
+
+
 
 # pop up function
 class PopupWindow(Widget):
@@ -63,11 +69,7 @@ class LoginPage(MDScreen):
                         self.parent.current = 'homepage'
                 else:
                         # print("False")
-                        popUp()
-                        
-                        
-
-                        
+                        popUp()         
 
 Dummy = """
         OneLineListItem:
@@ -76,55 +78,98 @@ Dummy = """
 """
 
 class HomePage(MDScreen):
-
-    availablelist=ObjectProperty(None) 
-
+    response = {"hello"}
     def fetchData(self, userInputStockData):
-        print(userInputStockData)
+        #Get list of stocks
+        self.response = requests.get('http://localhost/getStock/' + userInputStockData).json()
+        if self.response:
+                layout = GridLayout(rows=1,cols=2)
+                self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
+
+                leftLayout = GridLayout(rows=6,cols=2)
+        
+                leftLayout.add_widget(TwoLineListItem(text="Open",secondary_text=str(self.response['optionChain']['result'][0]['quote']['regularMarketOpen'])))  
+                leftLayout.add_widget(TwoLineListItem(text="Close",secondary_text=str(self.response['optionChain']['result'][0]['quote']['regularMarketPreviousClose']))) 
+                leftLayout.add_widget(TwoLineListItem(text="Bid",secondary_text=str(self.response['optionChain']['result'][0]['quote']['bid']))) 
+                leftLayout.add_widget(TwoLineListItem(text="Ask",secondary_text=str(self.response['optionChain']['result'][0]['quote']['ask']))) 
+                leftLayout.add_widget(TwoLineListItem(text="Volume",secondary_text=str(self.response['optionChain']['result'][0]['quote']['regularMarketVolume']))) 
+                leftLayout.add_widget(TwoLineListItem(text="PE Ratio",secondary_text=str(self.response['optionChain']['result'][0]['quote']['trailingPE']))) 
+                leftLayout.add_widget(TwoLineListItem(text="EPS",secondary_text=str(self.response['optionChain']['result'][0]['quote']['epsCurrentYear']))) 
+                leftLayout.add_widget(TwoLineListItem(text="Analyst Recommendation",secondary_text="I like this stock"))
+
+                layout.add_widget(leftLayout)   
+
+                rightLayout = GridLayout(rows=1)
+                # rightLayout.add_widget(
+                rightLayout.add_widget(MDDataTable(
+                        column_data=[
+                                ("Stock Name",dp(30)),
+                                ("Open",dp(30)),
+                                ("Close",dp(30))
+                        ],
+                        row_data=[
+                                ("GOOG",51.2,32.6)
+                        ]
+                ))
+
+                layout.add_widget(rightLayout)
+
+                # layout.add_widget(MDDataTable(
+                #         use_pagination=True,
+                #         check=True,
+                #         elevation=2,
+                #         ))     
+                self.manager.get_screen('homepage').availablelist.add_widget(layout)
 
     def addToWatchList(self):
-        print("Added to watchlist")
+        print("Add to watchlist")
 
-    #perform actions when entered
-    def on_enter(self, *args):
-        layout = GridLayout(rows=1,cols=2)
-        self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
+    def buyStock(self):
+        print("Buying Stock")
 
-        leftLayout = GridLayout(rows=6,cols=2)
+    def sellStock(self):
+        print("Selling Stockt")
 
+#     #perform actions when entered
+#     def on_enter(self, *args):
+#         layout = GridLayout(rows=1,cols=2)
+#         self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
+
+#         leftLayout = GridLayout(rows=6,cols=2)
        
-        leftLayout.add_widget(TwoLineListItem(text="Open",secondary_text="51.2"))  
-        leftLayout.add_widget(TwoLineListItem(text="Close",secondary_text="46.2")) 
-        leftLayout.add_widget(TwoLineListItem(text="Bid",secondary_text="No")) 
-        leftLayout.add_widget(TwoLineListItem(text="Ask",secondary_text="No")) 
-        leftLayout.add_widget(TwoLineListItem(text="Volume",secondary_text="100")) 
-        leftLayout.add_widget(TwoLineListItem(text="PE Ratio",secondary_text="51.2")) 
-        leftLayout.add_widget(TwoLineListItem(text="EPS",secondary_text="51.2")) 
-        leftLayout.add_widget(TwoLineListItem(text="Analyst Recommendation",secondary_text="51.2")) 
+#         print("DATA:", self.response)
+#         leftLayout.add_widget(TwoLineListItem(text="Open",secondary_text= "lol"))  
+#         leftLayout.add_widget(TwoLineListItem(text="Close",secondary_text="46.2")) 
+#         leftLayout.add_widget(TwoLineListItem(text="Bid",secondary_text="No")) 
+#         leftLayout.add_widget(TwoLineListItem(text="Ask",secondary_text="No")) 
+#         leftLayout.add_widget(TwoLineListItem(text="Volume",secondary_text="100")) 
+#         leftLayout.add_widget(TwoLineListItem(text="PE Ratio",secondary_text="51.2")) 
+#         leftLayout.add_widget(TwoLineListItem(text="EPS",secondary_text="51.2")) 
+#         leftLayout.add_widget(TwoLineListItem(text="Analyst Recommendation",secondary_text="51.2")) 
         
-        layout.add_widget(leftLayout)   
+#         layout.add_widget(leftLayout)   
 
-        rightLayout = GridLayout(rows=1)
-        # rightLayout.add_widget(
-        rightLayout.add_widget(MDDataTable(
-                column_data=[
-                        ("Stock Name",dp(30)),
-                        ("Open",dp(30)),
-                        ("Close",dp(30))
-                ],
-                row_data=[
-                        ("GOOG",51.2,32.6)
-                ]
-        ))
+#         rightLayout = GridLayout(rows=1)
+#         # rightLayout.add_widget(
+#         rightLayout.add_widget(MDDataTable(
+#                 column_data=[
+#                         ("Stock Name",dp(30)),
+#                         ("Open",dp(30)),
+#                         ("Close",dp(30))
+#                 ],
+#                 row_data=[
+#                         ("GOOG",51.2,32.6)
+#                 ]
+#         ))
 
-        layout.add_widget(rightLayout)
+#         layout.add_widget(rightLayout)
 
-        # layout.add_widget(MDDataTable(
-        #         use_pagination=True,
-        #         check=True,
-        #         elevation=2,
-        #         ))     
-        self.manager.get_screen('homepage').availablelist.add_widget(layout)
+#         # layout.add_widget(MDDataTable(
+#         #         use_pagination=True,
+#         #         check=True,
+#         #         elevation=2,
+#         #         ))     
+#         self.manager.get_screen('homepage').availablelist.add_widget(layout)
 #####################################################################################################               
  
 def PrintHistoricalAndRec(ticker):

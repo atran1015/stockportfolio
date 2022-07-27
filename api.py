@@ -1,29 +1,25 @@
-#!/usr/bin/env python3
-from distutils.log import error
-from xmlrpc.client import ResponseError
-from django import urls
 from flask import Flask
 import requests
 import pprint
 import time
 import json
 import math
-
+import os
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return "hello world"
+    return 'Homepage'
 
 @app.route('/getStock/<stock>')
 def getStockData(stock):
     header = {
-        "authority": "finance.yahoo.com",
-        "method": "GET",
-        "scheme": "https",
-        "accept": "application/json",
-        "X-API-KEY": "ZIrcNpIx1u3Y5gbzw9OX85WY5b6OQ6Fj5kPHZrh7",
+        'authority': 'finance.yahoo.com',
+        'method': 'GET',
+        'scheme': 'https',
+        'accept': 'application/json',
+        'X-API-KEY': os.environ.get('APIKEY'),
     }
     urls = [
         'https://yfapi.net/v7/finance/options/' + stock + '?date=' + str(math.floor(time.time())), #contains open, close, ask, bid, volume, eps
@@ -40,11 +36,11 @@ def getStockData(stock):
 @app.route('/smaStrategy/<stock>')
 def smaStrategy(stock):
     header = {
-        "authority": "finance.yahoo.com",
-        "method": "GET",
-        "scheme": "https",
-        "accept": "application/json",
-        "X-API-KEY": "ZIrcNpIx1u3Y5gbzw9OX85WY5b6OQ6Fj5kPHZrh7",
+        'authority': 'finance.yahoo.com',
+        'method': 'GET',
+        'scheme': 'https',
+        'accept': 'application/json',
+        'X-API-KEY': os.environ.get('APIKEY'),
     }
     response = requests.get('https://yfapi.net/v8/finance/spark?interval=1d&range=6mo&symbols=' + stock, headers=header).json()
     days = 100
@@ -69,5 +65,19 @@ def smaStrategy(stock):
         equalMA = stock + 'current price is equal to the 100-day moving average -- Lets wait!' + str(currClosingPrice) +  ' | MA = ' + str(movingAverage) + ')'
         return equalMA
 
-if __name__ == "__main__":
+
+@app.route('/meanReversion/<stock>')
+def meanReversionStrategy(stock):
+    header = {
+        'authority': 'finance.yahoo.com',
+        'method': 'GET',
+        'scheme': 'https',
+        'accept': 'application/json',
+        'X-API-KEY': os.environ.get('APIKEY'),
+    }
+    response = requests.get('https://yfapi.net/v8/finance/spark?interval=1d&range=72mo&symbols=' + stock, headers=header).json()
+    return response
+
+
+if __name__ == '__main__':
     app.run(debug=True)

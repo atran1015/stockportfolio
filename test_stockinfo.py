@@ -1,7 +1,7 @@
 from cmath import exp
 import unittest
 #from unittest.mock import patch
-import yfinance as yf
+#import yfinance as yf
 from stockinfo import *
 import json
 import pandas as pd

@@ -88,9 +88,14 @@ PageManager:
     
     MDLabel:
         text: "WatchList"
+        pos_hint: {"center_x": 1, "center_y": 0.8}
+
+    MDLabel:
+        text: "Balance: "
+        icon: 'money'
         pos_hint: {"center_x": 1, "center_y": 0.9}
 
-     #grid with all the tables to display
+    #grid with all the tables to display
     MDGridLayout:
         id:availablelist
         cols:2
@@ -99,9 +104,21 @@ PageManager:
         height:490
         top: 600
         padding:'10dp' 
-    
+
+    MDRoundFlatButton:
+        text: "Buy"
+        font_size: 12
+        pos_hint: {"center_x": 0.1,"center_y": 0.2}
+        on_press: root.addToWatchList()
+
+    MDRoundFlatButton:
+        text: "Sell"
+        font_size: 12
+        pos_hint: {"center_x": 0.2,"center_y": 0.2}
+        on_press: root.buyStock()
+
     MDRoundFlatButton:
         text: "Add to WatchList"
         font_size: 12
-        pos_hint: {"center_x": 0.2,"center_y": 0.2}
-        on_press: root.addToWatchList()
+        pos_hint: {"center_x": 0.3,"center_y": 0.2}
+        on_press: root.sellStock()
