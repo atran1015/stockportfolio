@@ -15,7 +15,7 @@ PageManager:
         padding: 25
         spacing: 25
         orientation: 'vertical'
-           
+       
     MDLabel:
         id: home
         text: "Welcome!"
@@ -63,6 +63,7 @@ PageManager:
 
 <P>:
     Label:
+        id: errmsg
         text : "Username does not exist."
         size_hint : 0.2, 0.1
         pos_hint : {"x" : 0.3, "top" : 0.8}
@@ -82,19 +83,31 @@ PageManager:
         pos_hint: {"center_x": 0.1, "center_y": 0.9}
 
     MDIconButton:
-        pos_hint: {"center_x": 0.4, "center_y": 0.9}
+        id: search
+        pos_hint: {"center_x": 0.3, "center_y": 0.9}
         icon: 'magnify'
         on_press: root.fetchData(root.ids.stock.text)
-    
+
     MDLabel:
         text: "WatchList"
         pos_hint: {"center_x": 1, "center_y": 0.8}
 
+    MDIcon:
+        pos_hint: {"center_x": 1.2, "center_y": 0.9}
+        icon: "cash-multiple"
+        font_size: 25
+
     MDLabel:
         text: "Balance: "
-        icon: 'money'
         pos_hint: {"center_x": 1, "center_y": 0.9}
-
+        
+    MDLabel:
+        id: money
+        text: "1000000"
+        pos_hint: {"center_x": 1.1, "center_y": 0.9}
+        theme_text_color: "Custom"
+        text_color: 0, 0.5, 0, 1
+        
     #grid with all the tables to display
     MDGridLayout:
         id:availablelist
@@ -109,16 +122,19 @@ PageManager:
         text: "Buy"
         font_size: 12
         pos_hint: {"center_x": 0.1,"center_y": 0.2}
-        on_press: root.addToWatchList()
+        on_press: root.buyStock()
 
     MDRoundFlatButton:
         text: "Sell"
         font_size: 12
         pos_hint: {"center_x": 0.2,"center_y": 0.2}
-        on_press: root.buyStock()
-
-    MDRoundFlatButton:
-        text: "Add to WatchList"
-        font_size: 12
-        pos_hint: {"center_x": 0.3,"center_y": 0.2}
         on_press: root.sellStock()
+
+    #MDRoundFlatButton:
+        #id: watch
+        #text: "Add"
+        #font_size: 12
+        #pos_hint: {"center_x": 0.4,"center_y": 0.9}
+        #on_press: root.addToWatchList()
+        #MDIcon:
+            #icon: "eye-plus"
