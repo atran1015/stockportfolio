@@ -85,6 +85,7 @@ Dummy = """
 """
 
 class HomePage(MDScreen):
+    availablelist=ObjectProperty(None) 
     def fetchData(self, stock):
         #Get list of stocks
         config = dotenv_values(".env")
@@ -120,33 +121,28 @@ class HomePage(MDScreen):
                 leftLayout.add_widget(TwoLineListItem(text="EPS",secondary_text=str(self.response['optionChain']['result'][0]['quote']['epsCurrentYear']))) 
                 leftLayout.add_widget(TwoLineListItem(text="Analyst Recommendation",secondary_text="I like this stock"))
 
-                layout.add_widget(leftLayout)   
+                global open_var
+                global close_var
+                open_var = str(self.response['optionChain']['result'][0]['quote']['regularMarketOpen'])
+                close_var = str(self.response['optionChain']['result'][0]['quote']['regularMarketPreviousClose'])
 
-        # if self.manager.get_screen('homepage').ids.search.on_press:
-                
-        #         button_box = MDBoxLayout(
-        #             pos_hint={"center_x": 0.4,"center_y": 0.9},
-        #             adaptive_size=True,
-        #             #on_press= lambda widget:self.addToWatchList(),
-        #             #on_press= self.addToWatchList(),
-        #         )
-        #         print("clicked")
+
+        if self.manager.get_screen('homepage').ids.search.on_press:
+                # create button box layout
+                button_box = MDBoxLayout(
+                    pos_hint={"center_x": 0.4,"center_y": 0.9},
+                    adaptive_size=True,
+                )
+                print("clicked")
         
-        # self.ids['watch'] = button_box
-
-        # for button_text in ["Add to watchlist"]:
-        #     button_box.add_widget(
-        #         MDRaisedButton(
-        #             text=button_text, on_release=self.on_button_press
-        #         )
-        #     )
-        # button = MDRaisedButton(
-        #         text="Add to watchlist", on_release=self.on_button_press
-        # )
-        # self.ids['watch'] = button
-        # button_box.add_widget(button)
-        # leftLayout.add_widget(button_box)
-        # layout.add_widget(leftLayout)
+        # create button
+        button = MDRaisedButton(
+                text="Add to watchlist", on_release=self.on_button_press
+        )
+        self.ids['watch'] = button
+        button_box.add_widget(button)
+        leftLayout.add_widget(button_box)
+        layout.add_widget(leftLayout)
         self.manager.get_screen('homepage').availablelist.add_widget(layout)
 
     def on_button_press(self, instance_button: MDRaisedButton):
@@ -159,24 +155,19 @@ class HomePage(MDScreen):
             pass
 
     def addToWatchList(self):
-        # TODO: so far can only print out individual table instead of appending row to table
-        # tried using global var data_list to build a list and then append list and refresh table
-        # problem: can't pass data to on_enter
+        
         ticker_symbol = self.manager.get_screen('homepage').ids.stock.text
         
         layout = GridLayout(rows=1,cols=2)
         rightLayout = GridLayout(rows=1)
         #print(dataofrow)
-        dataofrow = [(ticker_symbol), (10), (15)]
+        dataofrow = [(ticker_symbol), (open_var), (close_var)]
         if self.manager.get_screen('homepage').ids.watch.on_press:
-                # need to clear widgets
-                # self.manager.get_screen('homepage').availablelist.clear_widgets()
+                # append to list to be displayed on click
                 data_list.append(dataofrow)
-        print(data_list, "data_list from addToWatchList")
+        #print(data_list, "data_list from addToWatchList")
         
-        
-        #data_list.append(dataofrow)
-        #print(data_list)
+        # create table
         data_table = MDDataTable(
         
                 column_data=[
@@ -189,19 +180,19 @@ class HomePage(MDScreen):
                 
         )
         rightLayout.add_widget(data_table)
-        #print(data_table.row_data)
         layout.add_widget(rightLayout)
         count = 0
         current_symbol = self.manager.get_screen('homepage').ids.stock.text
-        current_data = [(current_symbol), (10), (15)]
+        current_data = [(current_symbol), (open_var), (close_var)]
         
+
+        # this is for err message if user tries to append same symbol
         for i in data_list:
             if i == current_data:
                 # counting occurence of same data
                 count +=1 
                 if count > 1:
                     #print("data is the same")
-                    
                     content = Button(text='You have already added this ticker into your watchlist.  \nPlease restart the program.')
                     popup = Popup(title='Error', content=content,size_hint=(None, None), size=(400, 400), auto_dismiss=False)
                     content.bind(on_press=popup.dismiss)
@@ -210,8 +201,6 @@ class HomePage(MDScreen):
             # else:
             #     print("data not the same")
         
- 
-        #self.userBalance()
         return self.manager.get_screen('homepage').availablelist.add_widget(layout)
         
     
@@ -227,31 +216,31 @@ class HomePage(MDScreen):
 
 #####################################################################################################               
  
-def PrintHistoricalAndRec(ticker):
-        hist = ticker.history(period="1d")
-        analyst_recdf = pd.DataFrame(ticker.recommendations)
-        df = pd.DataFrame(hist)
-        df2 = df[["Open","Volume","Close","Low"]]
-        df3 = pd.concat([df2, analyst_recdf])
-        print(df3)
-        df3.to_csv("concat_data.csv")
-        return df3
+# def PrintHistoricalAndRec(ticker):
+#         hist = ticker.history(period="1d")
+#         analyst_recdf = pd.DataFrame(ticker.recommendations)
+#         df = pd.DataFrame(hist)
+#         df2 = df[["Open","Volume","Close","Low"]]
+#         df3 = pd.concat([df2, analyst_recdf])
+#         print(df3)
+#         df3.to_csv("concat_data.csv")
+#         return df3
 
-def PrintPERatios(ticker):
-        print("two PE ratios are trailingPE and forwardPE: ", ticker["trailingPE"], ticker["forwardPE"])
-        return ticker["trailingPE"], ticker["forwardPE"]
+# def PrintPERatios(ticker):
+#         print("two PE ratios are trailingPE and forwardPE: ", ticker["trailingPE"], ticker["forwardPE"])
+#         return ticker["trailingPE"], ticker["forwardPE"]
 
-def PrintAsk(ticker):
-        print("Ask: ", ticker["ask"])
-        return ticker["ask"]
+# def PrintAsk(ticker):
+#         print("Ask: ", ticker["ask"])
+#         return ticker["ask"]
 
-def PrintBid(ticker):
-        print("Bid: ", ticker["bid"])
-        return ticker["bid"]
+# def PrintBid(ticker):
+#         print("Bid: ", ticker["bid"])
+#         return ticker["bid"]
 
-def PrintEPS(ticker):
-        print("EPS: ", ticker["revenuePerShare"])
-        return ticker["revenuePerShare"]
+# def PrintEPS(ticker):
+#         print("EPS: ", ticker["revenuePerShare"])
+#         return ticker["revenuePerShare"]
 
 
 ############################## SCREEN MANAGER ##########################
@@ -281,22 +270,22 @@ class stockPortfolio(MDApp):
 if __name__ == '__main__':
         
         stockPortfolio().run()
-        inp = input('Input a stock ticker: ')
-        stock = yf.Ticker(inp)
-        hist = stock.history(period="1d")
-        df = pd.DataFrame(hist)
-        df2 = df[["Open","Volume","Close","Low"]]
-        df2.to_csv("history.csv")
-        rec = stock.recommendations
-        rec.to_csv("recommendations.csv")
+        # inp = input('Input a stock ticker: ')
+        # stock = yf.Ticker(inp)
+        # hist = stock.history(period="1d")
+        # df = pd.DataFrame(hist)
+        # df2 = df[["Open","Volume","Close","Low"]]
+        # df2.to_csv("history.csv")
+        # rec = stock.recommendations
+        # rec.to_csv("recommendations.csv")
 
         
 
-        PrintHistoricalAndRec(stock)
-        PrintPERatios(stock.info)
-        PrintAsk(stock.info)
-        PrintBid(stock.info)
-        PrintEPS(stock.info)
+        # PrintHistoricalAndRec(stock)
+        # PrintPERatios(stock.info)
+        # PrintAsk(stock.info)
+        # PrintBid(stock.info)
+        # PrintEPS(stock.info)
 
 #without command line in IDE
 stockPortfolio().run()
