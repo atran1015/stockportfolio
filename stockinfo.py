@@ -33,8 +33,11 @@ from kivymd.uix.toolbar import MDToolbar
 from kivy.uix.popup import Popup
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.widget import Widget
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.floatlayout import MDFloatLayout
+from kivymd.uix.button import MDRaisedButton
 
-
+data_list = []
 
 # pop up function
 class PopupWindow(Widget):
@@ -99,36 +102,109 @@ class HomePage(MDScreen):
 
                 layout.add_widget(leftLayout)   
 
-                rightLayout = GridLayout(rows=1)
-                # rightLayout.add_widget(
-                rightLayout.add_widget(MDDataTable(
-                        column_data=[
-                                ("Stock Name",dp(30)),
-                                ("Open",dp(30)),
-                                ("Close",dp(30))
-                        ],
-                        row_data=[
-                                ("GOOG",51.2,32.6)
-                        ]
-                ))
+        if self.manager.get_screen('homepage').ids.search.on_press:
+                
+                button_box = MDBoxLayout(
+                    pos_hint={"center_x": 0.4,"center_y": 0.9},
+                    adaptive_size=True,
+                    #on_press= lambda widget:self.addToWatchList(),
+                    #on_press= self.addToWatchList(),
+                )
+                print("clicked")
+        
+        #self.ids['watch']= button_box
 
-                layout.add_widget(rightLayout)
+        # for button_text in ["Add to watchlist"]:
+        #     button_box.add_widget(
+        #         MDRaisedButton(
+        #             text=button_text, on_release=self.on_button_press
+        #         )
+        #     )
+        button = MDRaisedButton(
+                    text="Add to watchlist", on_release=self.on_button_press
+                )
+        self.ids['watch'] = button
+        button_box.add_widget(button)
+        leftLayout.add_widget(button_box)
+        layout.add_widget(leftLayout)
+        self.manager.get_screen('homepage').availablelist.add_widget(layout)
 
-                # layout.add_widget(MDDataTable(
-                #         use_pagination=True,
-                #         check=True,
-                #         elevation=2,
-                #         ))     
-                self.manager.get_screen('homepage').availablelist.add_widget(layout)
+    def on_button_press(self, instance_button: MDRaisedButton):
+        '''Called when a control button is clicked.'''
+        try:
+            {
+                "Add to watchlist": self.addToWatchList
+            }[instance_button.text]()
+        except KeyError:
+            pass
 
+    
     def addToWatchList(self):
-        print("Add to watchlist")
-
+        # TODO: so far can only print out individual table instead of appending row to table
+        # tried using global var data_list to build a list and then append list and refresh table
+        # problem: can't pass data to on_enter
+        ticker_symbol = self.manager.get_screen('homepage').ids.stock.text
+        
+        layout = GridLayout(rows=1,cols=2)
+        rightLayout = GridLayout(rows=1)
+        #print(dataofrow)
+        dataofrow = [(ticker_symbol), (10), (15)]
+        if self.manager.get_screen('homepage').ids.watch.on_press:
+                # need to clear widgets
+                # self.manager.get_screen('homepage').availablelist.clear_widgets()
+                data_list.append(dataofrow)
+        print(data_list, "data_list from addToWatchList")
+        
+        
+        #data_list.append(dataofrow)
+        #print(data_list)
+        data_table = MDDataTable(
+        
+                column_data=[
+                        ("Stock Name",dp(30)),
+                        ("Open",dp(30)),
+                        ("Close",dp(30))
+                ],
+                
+                row_data=data_list
+                
+        )
+        rightLayout.add_widget(data_table)
+        #print(data_table.row_data)
+        layout.add_widget(rightLayout)
+        count = 0
+        current_symbol = self.manager.get_screen('homepage').ids.stock.text
+        current_data = [(current_symbol), (10), (15)]
+        
+        for i in data_list:
+            if i == current_data:
+                # counting occurence of same data
+                count +=1 
+                if count > 1:
+                    #print("data is the same")
+                    
+                    content = Button(text='You have already added this ticker into your watchlist.  \nPlease restart the program.')
+                    popup = Popup(title='Error', content=content,size_hint=(None, None), size=(400, 400), auto_dismiss=False)
+                    content.bind(on_press=popup.dismiss)
+                    popup.open()
+        
+            # else:
+            #     print("data not the same")
+        
+ 
+        #self.userBalance()
+        return self.manager.get_screen('homepage').availablelist.add_widget(layout)
+        
+    
     def buyStock(self):
         print("Buying Stock")
 
     def sellStock(self):
-        print("Selling Stockt")
+        print("Selling Stock")
+
+    def userBalance(self):
+        userMoney = self.manager.get_screen('homepage').ids.money.text
+        print(int(userMoney))
 
 #     #perform actions when entered
 #     def on_enter(self, *args):
