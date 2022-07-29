@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 from operator import pos
+import pprint
 from turtle import position
+from dotenv import dotenv_values
 
-from aiohttp import request
-from django.http import response
+
 import yfinance as yf
 import pandas as pd
 import sqlite3
 import requests
+import os
+import math
+import time
 
 from typing import Text
 from kivymd.app import MDApp
@@ -81,16 +85,32 @@ Dummy = """
 """
 
 class HomePage(MDScreen):
-    response = {"hello"}
-    def fetchData(self, userInputStockData):
+    def fetchData(self, stock):
         #Get list of stocks
-        self.response = requests.get('http://localhost/getStock/' + userInputStockData).json()
+        config = dotenv_values(".env")
+        header = {
+                'authority': 'finance.yahoo.com',
+                'method': 'GET',
+                'scheme': 'https',
+                'accept': 'application/json',
+                'X-API-KEY': str(config["APIKEY"]),
+        }
+        print(header['X-API-KEY'])
+        urls = [
+                'https://yfapi.net/v7/finance/options/' + stock + '?date=' + str(math.floor(time.time())), #contains open, close, ask, bid, volume, eps
+                'https://yfapi.net/v6/finance/recommendationsbysymbol/' + stock, #contains the anaylst recomendations
+                'https://yfapi.net/v6/finance/quote?region=US&lang=en&symbols=' + stock #contains the trailing ratio
+        ]
+        data = {}
+        for url in urls: # combine all data into one chunk
+                response = requests.get(url, headers=header).json()
+                data.update(response)
+        self.response = data
         if self.response:
                 layout = GridLayout(rows=1,cols=2)
                 self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
 
                 leftLayout = GridLayout(rows=6,cols=2)
-        
                 leftLayout.add_widget(TwoLineListItem(text="Open",secondary_text=str(self.response['optionChain']['result'][0]['quote']['regularMarketOpen'])))  
                 leftLayout.add_widget(TwoLineListItem(text="Close",secondary_text=str(self.response['optionChain']['result'][0]['quote']['regularMarketPreviousClose']))) 
                 leftLayout.add_widget(TwoLineListItem(text="Bid",secondary_text=str(self.response['optionChain']['result'][0]['quote']['bid']))) 
@@ -102,17 +122,17 @@ class HomePage(MDScreen):
 
                 layout.add_widget(leftLayout)   
 
-        if self.manager.get_screen('homepage').ids.search.on_press:
+        # if self.manager.get_screen('homepage').ids.search.on_press:
                 
-                button_box = MDBoxLayout(
-                    pos_hint={"center_x": 0.4,"center_y": 0.9},
-                    adaptive_size=True,
-                    #on_press= lambda widget:self.addToWatchList(),
-                    #on_press= self.addToWatchList(),
-                )
-                print("clicked")
+        #         button_box = MDBoxLayout(
+        #             pos_hint={"center_x": 0.4,"center_y": 0.9},
+        #             adaptive_size=True,
+        #             #on_press= lambda widget:self.addToWatchList(),
+        #             #on_press= self.addToWatchList(),
+        #         )
+        #         print("clicked")
         
-        #self.ids['watch']= button_box
+        # self.ids['watch'] = button_box
 
         # for button_text in ["Add to watchlist"]:
         #     button_box.add_widget(
@@ -120,13 +140,13 @@ class HomePage(MDScreen):
         #             text=button_text, on_release=self.on_button_press
         #         )
         #     )
-        button = MDRaisedButton(
-                    text="Add to watchlist", on_release=self.on_button_press
-                )
-        self.ids['watch'] = button
-        button_box.add_widget(button)
-        leftLayout.add_widget(button_box)
-        layout.add_widget(leftLayout)
+        # button = MDRaisedButton(
+        #         text="Add to watchlist", on_release=self.on_button_press
+        # )
+        # self.ids['watch'] = button
+        # button_box.add_widget(button)
+        # leftLayout.add_widget(button_box)
+        # layout.add_widget(leftLayout)
         self.manager.get_screen('homepage').availablelist.add_widget(layout)
 
     def on_button_press(self, instance_button: MDRaisedButton):
@@ -138,7 +158,6 @@ class HomePage(MDScreen):
         except KeyError:
             pass
 
-    
     def addToWatchList(self):
         # TODO: so far can only print out individual table instead of appending row to table
         # tried using global var data_list to build a list and then append list and refresh table
@@ -206,46 +225,6 @@ class HomePage(MDScreen):
         userMoney = self.manager.get_screen('homepage').ids.money.text
         print(int(userMoney))
 
-#     #perform actions when entered
-#     def on_enter(self, *args):
-#         layout = GridLayout(rows=1,cols=2)
-#         self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
-
-#         leftLayout = GridLayout(rows=6,cols=2)
-       
-#         print("DATA:", self.response)
-#         leftLayout.add_widget(TwoLineListItem(text="Open",secondary_text= "lol"))  
-#         leftLayout.add_widget(TwoLineListItem(text="Close",secondary_text="46.2")) 
-#         leftLayout.add_widget(TwoLineListItem(text="Bid",secondary_text="No")) 
-#         leftLayout.add_widget(TwoLineListItem(text="Ask",secondary_text="No")) 
-#         leftLayout.add_widget(TwoLineListItem(text="Volume",secondary_text="100")) 
-#         leftLayout.add_widget(TwoLineListItem(text="PE Ratio",secondary_text="51.2")) 
-#         leftLayout.add_widget(TwoLineListItem(text="EPS",secondary_text="51.2")) 
-#         leftLayout.add_widget(TwoLineListItem(text="Analyst Recommendation",secondary_text="51.2")) 
-        
-#         layout.add_widget(leftLayout)   
-
-#         rightLayout = GridLayout(rows=1)
-#         # rightLayout.add_widget(
-#         rightLayout.add_widget(MDDataTable(
-#                 column_data=[
-#                         ("Stock Name",dp(30)),
-#                         ("Open",dp(30)),
-#                         ("Close",dp(30))
-#                 ],
-#                 row_data=[
-#                         ("GOOG",51.2,32.6)
-#                 ]
-#         ))
-
-#         layout.add_widget(rightLayout)
-
-#         # layout.add_widget(MDDataTable(
-#         #         use_pagination=True,
-#         #         check=True,
-#         #         elevation=2,
-#         #         ))     
-#         self.manager.get_screen('homepage').availablelist.add_widget(layout)
 #####################################################################################################               
  
 def PrintHistoricalAndRec(ticker):
