@@ -96,7 +96,6 @@ class HomePage(MDScreen):
                 'accept': 'application/json',
                 'X-API-KEY': str(config["APIKEY"]),
         }
-        print(header['X-API-KEY'])
         urls = [
                 'https://yfapi.net/v7/finance/options/' + stock + '?date=' + str(math.floor(time.time())), #contains open, close, ask, bid, volume, eps
                 'https://yfapi.net/v6/finance/recommendationsbysymbol/' + stock, #contains the anaylst recomendations
@@ -203,16 +202,45 @@ class HomePage(MDScreen):
         
         return self.manager.get_screen('homepage').availablelist.add_widget(layout)
         
-    
     def buyStock(self):
+        userMoney = self.manager.get_screen('homepage').ids.money.text
+        ticker_symbol = self.manager.get_screen('homepage').ids.stock.text
+        self.getStockData(ticker_symbol)['optionChain']['result'][0]['quote']['regularMarketOpen']
+        balance = float(userMoney) - float(self.getStockData(ticker_symbol)['optionChain']['result'][0]['quote']['regularMarketOpen'])
+        self.manager.get_screen('homepage').ids.money.text = str("{:0.2f}".format(balance))
         print("Buying Stock")
 
     def sellStock(self):
+        userMoney = self.manager.get_screen('homepage').ids.money.text
+        ticker_symbol = self.manager.get_screen('homepage').ids.stock.text
+        self.getStockData(ticker_symbol)['optionChain']['result'][0]['quote']['regularMarketOpen']
+        balance = float(userMoney) + float(self.getStockData(ticker_symbol)['optionChain']['result'][0]['quote']['regularMarketOpen'])
+        self.manager.get_screen('homepage').ids.money.text = str("{:0.2f}".format(balance))
         print("Selling Stock")
 
     def userBalance(self):
         userMoney = self.manager.get_screen('homepage').ids.money.text
         print(int(userMoney))
+
+    def getStockData(self, stock):
+        config = dotenv_values(".env")
+        header = {
+                'authority': 'finance.yahoo.com',
+                'method': 'GET',
+                'scheme': 'https',
+                'accept': 'application/json',
+                'X-API-KEY': str(config["APIKEY"]),
+        }
+        urls = [
+                'https://yfapi.net/v7/finance/options/' + stock + '?date=' + str(math.floor(time.time())), #contains open, close, ask, bid, volume, eps
+                'https://yfapi.net/v6/finance/recommendationsbysymbol/' + stock, #contains the anaylst recomendations
+                'https://yfapi.net/v6/finance/quote?region=US&lang=en&symbols=' + stock #contains the trailing ratio
+        ]
+        data = {}
+        for url in urls: # combine all data into one chunk
+                response = requests.get(url, headers=header).json()
+                data.update(response)
+        return data
 
 #####################################################################################################               
  
@@ -267,7 +295,7 @@ class stockPortfolio(MDApp):
 ######################################################
 #run the application
 ##using command line call
-if __name__ == '__main__':
+# if __name__ == '__main__':
         
         stockPortfolio().run()
         # inp = input('Input a stock ticker: ')
