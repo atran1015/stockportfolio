@@ -119,15 +119,22 @@ PageManager:
         padding:'10dp' 
 
     MDRoundFlatButton:
-        text: "Buy"
+        id: strat
+        text: "Strategy"
         font_size: 12
         pos_hint: {"center_x": 0.1,"center_y": 0.2}
+        on_press: root.chooseStrat()
+
+    MDRoundFlatButton:
+        text: "Buy"
+        font_size: 12
+        pos_hint: {"center_x": 0.2,"center_y": 0.2}
         on_press: root.buyStock()
 
     MDRoundFlatButton:
         text: "Sell"
         font_size: 12
-        pos_hint: {"center_x": 0.2,"center_y": 0.2}
+        pos_hint: {"center_x": 0.3,"center_y": 0.2}
         on_press: root.sellStock()
 
     #MDRoundFlatButton:
@@ -138,3 +145,12 @@ PageManager:
         #on_press: root.addToWatchList()
         #MDIcon:
             #icon: "eye-plus"
+
+<ItemConfirm>
+    on_release: root.set_icon(check)
+
+    CheckboxLeftWidget:
+        id: check
+        group: "check"
+        
+        

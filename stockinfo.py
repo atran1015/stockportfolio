@@ -18,7 +18,7 @@ from kivymd.app import MDApp
 from kivy.uix.screenmanager import ScreenManager
 from kivy.lang.builder import Builder
 from kivymd.uix.card import MDCard
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, StringProperty
 from kivymd.uix.label import MDLabel
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.screen import MDScreen
@@ -40,6 +40,9 @@ from kivy.uix.widget import Widget
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.button import MDRaisedButton
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.list import OneLineAvatarIconListItem
+from kivymd.theming import ThemeManager
 
 data_list = []
 
@@ -59,6 +62,21 @@ def popUp():
                    size_hint = (None, None), size = (300, 300))
     window.open()
 
+# for strategy popup/dialog
+class ItemConfirm(OneLineAvatarIconListItem):
+    divider = None
+
+    def set_icon(self, instance_check):
+        instance_check.active = True
+        check_list = instance_check.get_widgets(instance_check.group)
+        
+        for check in check_list:
+            if check != instance_check:
+                check.active = False
+
+        app = MDApp.get_running_app() # Access the running app instance.
+        home_screen = app.root.get_screen('homepage') # Access required screen.
+        home_screen.selected_item = self.text
 
 class LoginPage(MDScreen):
         def show_alert_dialog(self):
@@ -85,7 +103,10 @@ Dummy = """
 """
 
 class HomePage(MDScreen):
-    availablelist=ObjectProperty(None) 
+    availablelist=ObjectProperty(None)
+    dialog = None
+    theme_cls = ThemeManager()
+    selected_item = StringProperty() 
     def fetchData(self, stock):
         #Get list of stocks
         config = dotenv_values(".env")
@@ -217,6 +238,47 @@ class HomePage(MDScreen):
         balance = float(userMoney) + float(self.getStockData(ticker_symbol)['optionChain']['result'][0]['quote']['regularMarketOpen'])
         self.manager.get_screen('homepage').ids.money.text = str("{:0.2f}".format(balance))
         print("Selling Stock")
+
+           # creating a dialog window    
+    def chooseStrat(self):
+        if not self.dialog:
+            self.dialog = MDDialog(
+                title="Choose a strategy to use for backtest",
+                type="confirmation",
+                items=[
+                    ItemConfirm(text="SMA"), #, on_press=lambda x: print("SMA")),
+                    ItemConfirm(text="Mean Reversion"), #, on_press=lambda x: print("Mean Reversion")),
+                ],
+                buttons=[
+                    MDFlatButton(
+                        text="CANCEL",
+                        theme_text_color="Custom",
+                        text_color=self.theme_cls.primary_color,
+                        on_release=self.close_dialog,
+                    ),
+                    MDFlatButton(
+                        text="OK",
+                        theme_text_color="Custom",
+                        text_color=self.theme_cls.primary_color,
+                        on_release=self.ok_dialog,
+                    ),
+                ],
+            )
+        self.ids['strat'] = self.dialog
+        self.dialog.open()
+
+    # functional CANCEL button
+    def close_dialog(self, obj):
+        self.dialog.dismiss()
+
+    # functional OK button
+    def ok_dialog(self, obj, *args, **kwargs):
+        self.dialog.dismiss()
+        self.ids.strat.text = self.selected_item
+        if self.ids.strat.text == 'SMA':
+                print("i selected sma for backtest")
+        elif self.ids.strat.text == 'Mean Reversion':
+                print("i selected Mean Reversion for backtest")
 
     def userBalance(self):
         userMoney = self.manager.get_screen('homepage').ids.money.text
