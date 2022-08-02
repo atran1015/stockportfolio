@@ -4,7 +4,9 @@ import pprint
 from turtle import position
 from dotenv import dotenv_values
 
-
+from backtesting import Backtest, Strategy
+from backtesting.lib import crossover
+from backtesting.test import SMA
 import yfinance as yf
 import pandas as pd
 import sqlite3
@@ -45,6 +47,10 @@ from kivymd.uix.list import OneLineAvatarIconListItem
 from kivymd.theming import ThemeManager
 
 data_list = []
+# for testing 
+msft = yf.Ticker("MSFT")
+hist = msft.history(period="max")
+data3 = pd.DataFrame(hist)
 
 # pop up function
 class PopupWindow(Widget):
@@ -78,6 +84,31 @@ class ItemConfirm(OneLineAvatarIconListItem):
         home_screen = app.root.get_screen('homepage') # Access required screen.
         home_screen.selected_item = self.text
 
+class SmaCross(Strategy):
+    # Define the two MA lags as *class variables*
+    # for later optimization
+    n1 = 10
+    n2 = 20
+    
+    def init(self):
+        # Precompute the two moving averages
+        self.sma1 = self.I(SMA, self.data.Close, self.n1)
+        self.sma2 = self.I(SMA, self.data.Close, self.n2)
+    
+    def next(self):
+        # If sma1 crosses above sma2, close any existing
+        # short trades, and buy the asset
+        if crossover(self.sma1, self.sma2):
+            self.position.close()
+            self.buy()
+            
+
+        # Else, if sma1 crosses below sma2, close any existing
+        # long trades, and sell the asset
+        elif crossover(self.sma2, self.sma1):
+            self.position.close()
+            self.sell()
+            
 class LoginPage(MDScreen):
         def show_alert_dialog(self):
                 if not self.dialog:
@@ -276,8 +307,32 @@ class HomePage(MDScreen):
         self.dialog.dismiss()
         self.ids.strat.text = self.selected_item
         if self.ids.strat.text == 'SMA':
+                bt = Backtest(data3, SmaCross, cash=1000000, commission=.002)
+                stats = bt.run()
+                layout = GridLayout(rows=1,cols=2, pos_hint={'center_y': 0.4})
+                self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
+                leftLayout = GridLayout(rows=6,cols=2)
+                leftLayout.add_widget(TwoLineListItem(text="% profitability",secondary_text=str('no data')))
+                leftLayout.add_widget(TwoLineListItem(text="Win/Loss ratio",secondary_text=str('no data')))
+                leftLayout.add_widget(TwoLineListItem(text="Annualized return",secondary_text=str(stats['Return (Ann.) [%]'])))
+                leftLayout.add_widget(TwoLineListItem(text="Max drawdown",secondary_text=str(stats['Max. Drawdown [%]'])))
+                leftLayout.add_widget(TwoLineListItem(text="Volatility",secondary_text=str(stats['Volatility (Ann.) [%]'])))
+                leftLayout.add_widget(TwoLineListItem(text="Sharpe Ratio",secondary_text=str(stats['Sharpe Ratio'])))
+                layout.add_widget(leftLayout)
+                self.manager.get_screen('homepage').availablelist.add_widget(layout)
                 print("i selected sma for backtest")
         elif self.ids.strat.text == 'Mean Reversion':
+                layout = GridLayout(rows=1,cols=2)
+                self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
+                leftLayout = GridLayout(rows=6,cols=2)
+                leftLayout.add_widget(TwoLineListItem(text="% profitability",secondary_text=str('test')))
+                leftLayout.add_widget(TwoLineListItem(text="Win/Loss ratio",secondary_text=str('test')))
+                leftLayout.add_widget(TwoLineListItem(text="Annualized return",secondary_text=str('test')))
+                leftLayout.add_widget(TwoLineListItem(text="Max drawdown",secondary_text=str('test')))
+                leftLayout.add_widget(TwoLineListItem(text="Volatility",secondary_text=str('test')))
+                leftLayout.add_widget(TwoLineListItem(text="Sharpe Ratio",secondary_text=str('test')))
+                layout.add_widget(leftLayout)
+                self.manager.get_screen('homepage').availablelist.add_widget(layout)
                 print("i selected Mean Reversion for backtest")
 
     def userBalance(self):
@@ -359,7 +414,7 @@ class stockPortfolio(MDApp):
 ##using command line call
 # if __name__ == '__main__':
         
-        stockPortfolio().run()
+        # stockPortfolio().run()
         # inp = input('Input a stock ticker: ')
         # stock = yf.Ticker(inp)
         # hist = stock.history(period="1d")
