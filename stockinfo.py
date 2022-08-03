@@ -158,6 +158,10 @@ class HomePage(MDScreen):
                 response = requests.get(url, headers=header).json()
                 data.update(response)
         self.response = data
+        # for backtesting
+        global data2 
+        data2 = pd.DataFrame(self.response)
+        # ### end #######
         if self.response:
                 layout = GridLayout(rows=1,cols=2)
                 self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
@@ -307,13 +311,14 @@ class HomePage(MDScreen):
         self.dialog.dismiss()
         self.ids.strat.text = self.selected_item
         if self.ids.strat.text == 'SMA':
+                # to use symbols that user input, replace 'data3' with 'data2'
                 bt = Backtest(data3, SmaCross, cash=1000000, commission=.002)
                 stats = bt.run()
                 layout = GridLayout(rows=1,cols=2, pos_hint={'center_y': 0.4})
                 self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
                 leftLayout = GridLayout(rows=6,cols=2)
-                leftLayout.add_widget(TwoLineListItem(text="% profitability",secondary_text=str('no data')))
-                leftLayout.add_widget(TwoLineListItem(text="Win/Loss ratio",secondary_text=str('no data')))
+                leftLayout.add_widget(TwoLineListItem(text="% profitability",secondary_text=str(stats['Profit Factor'])))
+                leftLayout.add_widget(TwoLineListItem(text="Win/Loss ratio",secondary_text=str(stats['Win Rate [%]'])))
                 leftLayout.add_widget(TwoLineListItem(text="Annualized return",secondary_text=str(stats['Return (Ann.) [%]'])))
                 leftLayout.add_widget(TwoLineListItem(text="Max drawdown",secondary_text=str(stats['Max. Drawdown [%]'])))
                 leftLayout.add_widget(TwoLineListItem(text="Volatility",secondary_text=str(stats['Volatility (Ann.) [%]'])))
