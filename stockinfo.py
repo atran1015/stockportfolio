@@ -332,7 +332,7 @@ class HomePage(MDScreen):
                 t = bt.Backtest(s, backtestdata)
                 res = bt.run(t) # res['above100sma'].stats to get variables
                 layout = GridLayout(rows=1,cols=2)
-                leftLayout = GridLayout(rows=6,cols=2)
+                leftLayout = GridLayout(rows=7,cols=2)
                 leftLayout.add_widget(TwoLineListItem(text="% profitability",secondary_text=str(res['above100sma'].stats['ytd'])))
                 leftLayout.add_widget(TwoLineListItem(text="Win/Loss ratio",secondary_text=str(res['above100sma'].stats['win_year_perc'])))
                 leftLayout.add_widget(TwoLineListItem(text="Annualized return",secondary_text=str(res['above100sma'].stats['total_return'])))
@@ -341,8 +341,8 @@ class HomePage(MDScreen):
                 leftLayout.add_widget(TwoLineListItem(text="Sharpe Ratio",secondary_text=str(res['above100sma'].stats['yearly_sharpe'])))
                 # render image
                 wimg = Image(source='output.png')
+                leftLayout.add_widget(wimg)
                 layout.add_widget(leftLayout)
-                layout.add_widget(wimg)
                 self.manager.get_screen('homepage').availablelist.add_widget(layout)
                 print("i selected sma for backtest") # debug
         elif self.ids.strat.text == 'Mean Reversion':
