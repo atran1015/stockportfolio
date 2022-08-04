@@ -160,7 +160,8 @@ class HomePage(MDScreen):
         urls = [
                 'https://yfapi.net/v7/finance/options/' + stock + '?date=' + str(math.floor(time.time())), #contains open, close, ask, bid, volume, eps
                 'https://yfapi.net/v6/finance/recommendationsbysymbol/' + stock, #contains the anaylst recomendations
-                'https://yfapi.net/v6/finance/quote?region=US&lang=en&symbols=' + stock #contains the trailing ratio
+                'https://yfapi.net/v6/finance/quote?region=US&lang=en&symbols=' + stock, #contains the trailing ratio
+                'https://yfapi.net/ws/insights/v1/finance/insights?symbol=' + stock
         ]
         data = {}
         for url in urls: # combine all data into one chunk
@@ -179,7 +180,7 @@ class HomePage(MDScreen):
                 leftLayout.add_widget(TwoLineListItem(text="Volume",secondary_text=str(self.response['optionChain']['result'][0]['quote']['regularMarketVolume']))) 
                 leftLayout.add_widget(TwoLineListItem(text="PE Ratio",secondary_text=str(self.response['optionChain']['result'][0]['quote']['trailingPE']))) 
                 leftLayout.add_widget(TwoLineListItem(text="EPS",secondary_text=str(self.response['optionChain']['result'][0]['quote']['epsCurrentYear']))) 
-                leftLayout.add_widget(TwoLineListItem(text="Analyst Recommendation",secondary_text="I like this stock"))
+                leftLayout.add_widget(TwoLineListItem(text="Analyst Recommendation",secondary_text=str(self.response['finance']['result']['instrumentInfo']['recommendation']['rating'])))
 
                 # for watchlist
                 global open_var
@@ -315,7 +316,7 @@ class HomePage(MDScreen):
         self.dialog.dismiss()
         self.ids.strat.text = self.selected_item
         if self.ids.strat.text == 'SMA':
-                self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
+                
                 # get user input
                 currStock = self.manager.get_screen('homepage').ids.stock.text
                 # call bt library
@@ -332,6 +333,7 @@ class HomePage(MDScreen):
                 t = bt.Backtest(s, backtestdata)
                 res = bt.run(t) # res['above100sma'].stats to get variables
                 layout = GridLayout(rows=1,cols=2)
+                self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
                 leftLayout = GridLayout(rows=7,cols=2)
                 leftLayout.add_widget(TwoLineListItem(text="% profitability",secondary_text=str(res['above100sma'].stats['ytd'])))
                 leftLayout.add_widget(TwoLineListItem(text="Win/Loss ratio",secondary_text=str(res['above100sma'].stats['win_year_perc'])))
