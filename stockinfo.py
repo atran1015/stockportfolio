@@ -163,8 +163,7 @@ class HomePage(MDScreen):
         ]
         data = {}
         for url in urls: # combine all data into one chunk
-                data_adapter = responseData_Adapter(responseData=requests.get(url, headers=header).json())
-                response = data_adapter.responseData()
+                response = requests.get(url, headers=header).json()
                 data.update(response)
         self.response = data
         if self.response:
@@ -332,7 +331,7 @@ class HomePage(MDScreen):
                 t = bt.Backtest(s, backtestdata)
                 res = bt.run(t) # res['above100sma'].stats to get variables
                 layout = GridLayout(rows=2,cols=1)
-                layout.add_widget(MDTextField(text="Strategy: SMA, backtest results:"))
+                layout.add_widget(MDTextField(text="Strategy: SMA, Backtest results:"))
                 self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
                 leftLayout = GridLayout(rows=7,cols=2)
                 leftLayout.add_widget(TwoLineListItem(text="% profitability",secondary_text=str(res['above100sma'].stats['ytd'])))
@@ -351,7 +350,7 @@ class HomePage(MDScreen):
                 print("i selected sma for backtest") # debug
         elif self.ids.strat.text == 'Mean Reversion':
                 layout = GridLayout(rows=2,cols=1)
-                layout.add_widget(MDTextField(text="Strategy: Mean Reversion, backtest results:"))
+                layout.add_widget(MDTextField(text="Strategy: Mean Reversion, Backtest results:"))
                 self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
                 leftLayout = GridLayout(rows=6,cols=2)
                 leftLayout.add_widget(TwoLineListItem(text="% profitability",secondary_text=str(0.504654)))
@@ -386,6 +385,7 @@ class HomePage(MDScreen):
         for url in urls: # combine all data into one chunk
                 data_adapter = responseData_Adapter(responseData=requests.get(url, headers=header).json())
                 response = data_adapter.responseData()
+                #response = requests.get(url, headers=header).json()
                 data.update(response)
         return data
 
