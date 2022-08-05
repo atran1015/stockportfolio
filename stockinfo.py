@@ -134,13 +134,11 @@ class LoginPage(MDScreen):
                         self.parent.current = 'homepage'
                 else:
                         # print("False")
-                        popUp()         
+                        popUp()   
 
-Dummy = """
-        OneLineListItem:
-            id: item1
-            text: "Awesome"
-"""
+class responseData_Adapter():
+        def __init__(self,**adapted_method):
+             self.__dict__.update(adapted_method)
 
 class HomePage(MDScreen):
     availablelist=ObjectProperty(None)
@@ -165,7 +163,8 @@ class HomePage(MDScreen):
         ]
         data = {}
         for url in urls: # combine all data into one chunk
-                response = requests.get(url, headers=header).json()
+                data_adapter = responseData_Adapter(responseData=requests.get(url, headers=header).json())
+                response = data_adapter.responseData()
                 data.update(response)
         self.response = data
         if self.response:
@@ -385,7 +384,8 @@ class HomePage(MDScreen):
         ]
         data = {}
         for url in urls: # combine all data into one chunk
-                response = requests.get(url, headers=header).json()
+                data_adapter = responseData_Adapter(responseData=requests.get(url, headers=header).json())
+                response = data_adapter.responseData()
                 data.update(response)
         return data
 
