@@ -128,21 +128,21 @@ PageManager:
     MDRoundFlatButton:
         text: "Buy"
         font_size: 12
-        pos_hint: {"center_x": 0.2,"center_y": 0.1}
+        pos_hint: {"center_x": 0.3,"center_y": 0.1}
         on_press: root.buyStock()
 
     MDRoundFlatButton:
         text: "Sell"
         font_size: 12
-        pos_hint: {"center_x": 0.3,"center_y": 0.1}
+        pos_hint: {"center_x": 0.4,"center_y": 0.1}
         on_press: root.sellStock()
 
-    #MDRoundFlatButton:
-        #id: watch
-        #text: "Add"
-        #font_size: 12
-        #pos_hint: {"center_x": 0.4,"center_y": 0.9}
-        #on_press: root.addToWatchList()
+    MDRoundFlatButton:
+        id: watch
+        text: "Add to watchlist"
+        font_size: 12
+        pos_hint: {"center_x": 0.2,"center_y": 0.1}
+        on_press: root.addToWatchList()
         #MDIcon:
             #icon: "eye-plus"
 

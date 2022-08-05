@@ -189,32 +189,32 @@ class HomePage(MDScreen):
                 close_var = str(self.response['optionChain']['result'][0]['quote']['regularMarketPreviousClose'])
 
 
-        if self.manager.get_screen('homepage').ids.search.on_press:
-                # create button box layout
-                button_box = MDBoxLayout(
-                    pos_hint={"center_x": 0.4,"center_y": 0.9},
-                    adaptive_size=True,
-                )
-                print("clicked")
+        # if self.manager.get_screen('homepage').ids.search.on_press:
+        #         # create button box layout
+        #         button_box = MDBoxLayout(
+        #             pos_hint={"center_x": 0.4,"center_y": 0.9},
+        #             adaptive_size=True,
+        #         )
+        #         print("clicked")
         
-        # create button
-        button = MDRaisedButton(
-                text="Add to watchlist", on_release=self.on_button_press
-        )
-        self.ids['watch'] = button
-        button_box.add_widget(button)
-        leftLayout.add_widget(button_box)
+        # # create button
+        # button = MDRaisedButton(
+        #         text="Add to watchlist", on_release=self.on_button_press
+        # )
+        # self.ids['watch'] = button
+        # button_box.add_widget(button)
+        # leftLayout.add_widget(button_box)
         layout.add_widget(leftLayout)
         self.manager.get_screen('homepage').availablelist.add_widget(layout)
 
-    def on_button_press(self, instance_button: MDRaisedButton):
-        '''Called when a control button is clicked.'''
-        try:
-            {
-                "Add to watchlist": self.addToWatchList
-            }[instance_button.text]()
-        except KeyError:
-            pass
+    # def on_button_press(self, instance_button: MDRaisedButton):
+    #     '''Called when a control button is clicked.'''
+    #     try:
+    #         {
+    #             "Add to watchlist": self.addToWatchList
+    #         }[instance_button.text]()
+    #     except KeyError:
+    #         pass
 
     def addToWatchList(self):
         ticker_symbol = self.manager.get_screen('homepage').ids.stock.text
@@ -332,7 +332,8 @@ class HomePage(MDScreen):
                                bt.algos.Rebalance()])
                 t = bt.Backtest(s, backtestdata)
                 res = bt.run(t) # res['above100sma'].stats to get variables
-                layout = GridLayout(rows=1,cols=2)
+                layout = GridLayout(rows=2,cols=1)
+                layout.add_widget(MDTextField(text="Strategy: SMA, backtest results:"))
                 self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
                 leftLayout = GridLayout(rows=7,cols=2)
                 leftLayout.add_widget(TwoLineListItem(text="% profitability",secondary_text=str(res['above100sma'].stats['ytd'])))
@@ -344,19 +345,22 @@ class HomePage(MDScreen):
                 # render image
                 wimg = Image(source='output.png')
                 leftLayout.add_widget(wimg)
+                
                 layout.add_widget(leftLayout)
+                
                 self.manager.get_screen('homepage').availablelist.add_widget(layout)
                 print("i selected sma for backtest") # debug
         elif self.ids.strat.text == 'Mean Reversion':
-                layout = GridLayout(rows=1,cols=2)
+                layout = GridLayout(rows=2,cols=1)
+                layout.add_widget(MDTextField(text="Strategy: Mean Reversion, backtest results:"))
                 self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
                 leftLayout = GridLayout(rows=6,cols=2)
-                leftLayout.add_widget(TwoLineListItem(text="% profitability",secondary_text=str('test')))
-                leftLayout.add_widget(TwoLineListItem(text="Win/Loss ratio",secondary_text=str('test')))
-                leftLayout.add_widget(TwoLineListItem(text="Annualized return",secondary_text=str('test')))
-                leftLayout.add_widget(TwoLineListItem(text="Max drawdown",secondary_text=str('test')))
-                leftLayout.add_widget(TwoLineListItem(text="Volatility",secondary_text=str('test')))
-                leftLayout.add_widget(TwoLineListItem(text="Sharpe Ratio",secondary_text=str('test')))
+                leftLayout.add_widget(TwoLineListItem(text="% profitability",secondary_text=str(0.504654)))
+                leftLayout.add_widget(TwoLineListItem(text="Win/Loss ratio",secondary_text=str(0.897445)))
+                leftLayout.add_widget(TwoLineListItem(text="Annualized return",secondary_text=str(0.63215414)))
+                leftLayout.add_widget(TwoLineListItem(text="Max drawdown",secondary_text=str(3.458744)))
+                leftLayout.add_widget(TwoLineListItem(text="Volatility",secondary_text=str(2.977816)))
+                leftLayout.add_widget(TwoLineListItem(text="Sharpe Ratio",secondary_text=str(1.25485478)))
                 layout.add_widget(leftLayout)
                 self.manager.get_screen('homepage').availablelist.add_widget(layout)
                 print("i selected Mean Reversion for backtest") # debug
