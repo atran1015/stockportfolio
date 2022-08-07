@@ -395,7 +395,8 @@ class HomePage(MDScreen):
                 tmp = bt.merge(tw, data, sma50, sma200)
                 tmp.columns = ['tw', 'price', 'sma50', 'sma200']
                 ax = tmp.plot(figsize=(15,5), secondary_y=['tw'])
-
+                fig2 = ax.get_figure()
+                fig2.savefig("output2.png")
                 ma_cross = bt.Strategy('ma_cross', [WeighTarget(tw),
                                                     bt.algos.Rebalance()])
                 t = bt.Backtest(ma_cross, data)
@@ -406,13 +407,15 @@ class HomePage(MDScreen):
                 layout = GridLayout(rows=2,cols=1)
                 layout.add_widget(MDTextField(text="Strategy: SMA Crossover, Backtest results:"))
                 self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
-                leftLayout = GridLayout(rows=6,cols=2)
+                leftLayout = GridLayout(rows=7,cols=2)
                 leftLayout.add_widget(TwoLineListItem(text="% profitability",secondary_text=str(res.stats.values[10][0])))
                 leftLayout.add_widget(TwoLineListItem(text="Win/Loss ratio",secondary_text=str(res.stats.values[-2][0])))
                 leftLayout.add_widget(TwoLineListItem(text="Annualized return",secondary_text=str(res.stats.values[3][0]))) 
                 leftLayout.add_widget(TwoLineListItem(text="Max drawdown",secondary_text=str(res.stats.values[5][0])))
                 leftLayout.add_widget(TwoLineListItem(text="Volatility",secondary_text=str(res.stats.values[-11][0])))
                 leftLayout.add_widget(TwoLineListItem(text="Sharpe Ratio",secondary_text=str(res.stats.values[-14][0])))
+                displayimg = Image(source='output2.png')
+                leftLayout.add_widget(displayimg)
                 layout.add_widget(leftLayout)
                 self.manager.get_screen('homepage').availablelist.add_widget(layout)
                 print("i selected SMA Crossover for backtest") # debug
