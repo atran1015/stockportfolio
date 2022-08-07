@@ -117,6 +117,33 @@ class SelectWhere(bt.Algo):
         return True
 
         # first we create the Strategy
+        
+class WeighTarget(bt.Algo):
+    """
+    Sets target weights based on a target weight DataFrame.
+
+    Args:
+        * target_weights (DataFrame): DataFrame containing the target weights
+
+    Sets:
+        * weights
+
+    """
+
+    def __init__(self, target_weights):
+        self.tw = target_weights
+
+    def __call__(self, target):
+        # get target weights on date target.now
+        if target.now in self.tw.index:
+            w = self.tw.loc[target.now]
+
+            # save in temp - this will be used by the weighing algo
+            # also dropping any na's just in case they pop up
+            target.temp['weights'] = w.dropna()
+
+        # return True because we want to keep on moving down the stack
+        return True
             
 class LoginPage(MDScreen):
         def show_alert_dialog(self):
@@ -177,7 +204,10 @@ class HomePage(MDScreen):
                 leftLayout.add_widget(TwoLineListItem(text="Ask",secondary_text=str(self.response['optionChain']['result'][0]['quote']['ask']))) 
                 leftLayout.add_widget(TwoLineListItem(text="Volume",secondary_text=str(self.response['optionChain']['result'][0]['quote']['regularMarketVolume']))) 
                 leftLayout.add_widget(TwoLineListItem(text="PE Ratio",secondary_text=str(self.response['optionChain']['result'][0]['quote']['trailingPE']))) 
-                leftLayout.add_widget(TwoLineListItem(text="EPS",secondary_text=str(self.response['optionChain']['result'][0]['quote']['epsCurrentYear']))) 
+                if 'epsCurrentYear' in self.response['optionChain']['result'][0]['quote']:
+                    leftLayout.add_widget(TwoLineListItem(text="EPS",secondary_text=str(self.response['optionChain']['result'][0]['quote']['epsCurrentYear']))) 
+                else:
+                    leftLayout.add_widget(TwoLineListItem(text="EPS",secondary_text='N/A'))
                 leftLayout.add_widget(TwoLineListItem(text="Analyst Recommendation",secondary_text=str(self.response['finance']['result']['instrumentInfo']['recommendation']['rating'])))
 
                 # for watchlist
@@ -285,7 +315,7 @@ class HomePage(MDScreen):
                 type="confirmation",
                 items=[
                     ItemConfirm(text="SMA"), #, on_press=lambda x: print("SMA")),
-                    ItemConfirm(text="Mean Reversion"), #, on_press=lambda x: print("Mean Reversion")),
+                    ItemConfirm(text="SMA Crossover"), #, on_press=lambda x: print("Mean Reversion")),
                 ],
                 buttons=[
                     MDFlatButton(
@@ -313,10 +343,9 @@ class HomePage(MDScreen):
     def ok_dialog(self, obj, *args, **kwargs):
         self.dialog.dismiss()
         self.ids.strat.text = self.selected_item
+        currStock = self.manager.get_screen('homepage').ids.stock.text
         if self.ids.strat.text == 'SMA':
-                
                 # get user input
-                currStock = self.manager.get_screen('homepage').ids.stock.text
                 # call bt library
                 backtestdata = bt.get(currStock, start='2012-01-01', end='2022-01-01')
                 sma = backtestdata.rolling(100).mean() # over 100 days
@@ -348,20 +377,45 @@ class HomePage(MDScreen):
                 
                 self.manager.get_screen('homepage').availablelist.add_widget(layout)
                 print("i selected sma for backtest") # debug
-        elif self.ids.strat.text == 'Mean Reversion':
+        elif self.ids.strat.text == 'SMA Crossover':
+                ## download some data & calc SMAs
+                data = bt.get('spy', start='2010-01-01')
+                sma50 = data.rolling(50).mean()
+                sma200 = data.rolling(200).mean()
+
+                ## now we need to calculate our target weight DataFrame
+                # first we will copy the sma200 DataFrame since our weights will have the same strucutre
+                tw = sma200.copy()
+                # set appropriate target weights
+                tw[sma50 > sma200] = 1.0
+                tw[sma50 <= sma200] = -1.0
+                # here we will set the weight to 0 - this is because the sma200 needs 200 data points before
+                # calculating its first point. Therefore, it will start with a bunch of nulls (NaNs).
+                tw[sma200.isnull()] = 0.0
+                tmp = bt.merge(tw, data, sma50, sma200)
+                tmp.columns = ['tw', 'price', 'sma50', 'sma200']
+                ax = tmp.plot(figsize=(15,5), secondary_y=['tw'])
+
+                ma_cross = bt.Strategy('ma_cross', [WeighTarget(tw),
+                                                    bt.algos.Rebalance()])
+                t = bt.Backtest(ma_cross, data)
+                res = bt.run(t)
+
+                print(res.stats)
+
                 layout = GridLayout(rows=2,cols=1)
-                layout.add_widget(MDTextField(text="Strategy: Mean Reversion, Backtest results:"))
+                layout.add_widget(MDTextField(text="Strategy: SMA Crossover, Backtest results:"))
                 self.manager.get_screen('homepage').availablelist.clear_widgets() #clear widgets
                 leftLayout = GridLayout(rows=6,cols=2)
-                leftLayout.add_widget(TwoLineListItem(text="% profitability",secondary_text=str(0.504654)))
-                leftLayout.add_widget(TwoLineListItem(text="Win/Loss ratio",secondary_text=str(0.897445)))
-                leftLayout.add_widget(TwoLineListItem(text="Annualized return",secondary_text=str(0.63215414)))
-                leftLayout.add_widget(TwoLineListItem(text="Max drawdown",secondary_text=str(3.458744)))
-                leftLayout.add_widget(TwoLineListItem(text="Volatility",secondary_text=str(2.977816)))
-                leftLayout.add_widget(TwoLineListItem(text="Sharpe Ratio",secondary_text=str(1.25485478)))
+                leftLayout.add_widget(TwoLineListItem(text="% profitability",secondary_text=str(res.stats.values[10][0])))
+                leftLayout.add_widget(TwoLineListItem(text="Win/Loss ratio",secondary_text=str(res.stats.values[-2][0])))
+                leftLayout.add_widget(TwoLineListItem(text="Annualized return",secondary_text=str(res.stats.values[3][0]))) 
+                leftLayout.add_widget(TwoLineListItem(text="Max drawdown",secondary_text=str(res.stats.values[5][0])))
+                leftLayout.add_widget(TwoLineListItem(text="Volatility",secondary_text=str(res.stats.values[-11][0])))
+                leftLayout.add_widget(TwoLineListItem(text="Sharpe Ratio",secondary_text=str(res.stats.values[-14][0])))
                 layout.add_widget(leftLayout)
                 self.manager.get_screen('homepage').availablelist.add_widget(layout)
-                print("i selected Mean Reversion for backtest") # debug
+                print("i selected SMA Crossover for backtest") # debug
 
     def userBalance(self):
         userMoney = self.manager.get_screen('homepage').ids.money.text
